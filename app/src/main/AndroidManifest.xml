@@ -66,7 +66,7 @@
         </receiver>
 
         <service android:name=".GcmIntentService" />
-
+        <!--AIzaSyAZLzFefPoqzRQPGmwuSz2EsK93JIrDXrE office -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
