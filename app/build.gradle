@@ -24,4 +24,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:6.1.+'
     compile 'com.github.castorflex.smoothprogressbar:library-circular:1.0.1'
     compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.github.amlcurran.showcaseview:library:5.0.0'
 }

@@ -14,6 +14,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory.Options;
 
+import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
@@ -21,12 +22,15 @@ import android.os.CountDownTimer;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,6 +85,8 @@ public class MainActivity extends ActionBarActivity  implements GooglePlayServic
     LocationClient mLocationClient;
     Location mCurrentLocation;
     GoogleMap map;
+    SwitchCompat driver_status;
+    TextView driver_status_text;
 
 
 
@@ -112,6 +118,25 @@ public class MainActivity extends ActionBarActivity  implements GooglePlayServic
 				R.id.map)).getMap();
 		map.getUiSettings().setZoomControlsEnabled(false);
 		map.getUiSettings().setRotateGesturesEnabled(false);
+        map.getUiSettings().setAllGesturesEnabled(false);
+        driver_status = (SwitchCompat) findViewById(R.id.driver_status);
+        driver_status_text = (TextView) findViewById(R.id.driver_status_text);
+        driver_status.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    driver_status_text.setText("YOU ARE ONLINE");
+                    RelativeLayout lLayout = (RelativeLayout) findViewById(R.id.bottom_bar);
+                    lLayout.setBackgroundColor(Color.parseColor("#2196F3"));
+                }else{
+
+                    driver_status_text.setText("PRESS THE BUTTON TO GO ONLINE");
+                    RelativeLayout lLayout = (RelativeLayout) findViewById(R.id.bottom_bar);
+                    lLayout.setBackgroundColor(Color.parseColor("#fff41921"));
+                }
+            }
+        });
+
 
 
 
@@ -276,7 +301,7 @@ public class MainActivity extends ActionBarActivity  implements GooglePlayServic
                 location.getLongitude());
         map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_dot)));
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,
-                15));
+                17));
 
     }
 
