@@ -1,0 +1,54 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.xirb.MainActivity$PlaceholderFragment">
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@drawable/background" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="75dp"
+        android:layout_marginTop="50dp"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/logo" />
+    </LinearLayout>
+
+    <!--<com.dd.CircularProgressButton-->
+    <!--android:id="@+id/splash_button"-->
+    <!--android:layout_width="75dp"-->
+    <!--android:layout_height="75dp"-->
+    <!--android:layout_alignParentBottom="true"-->
+    <!--android:layout_marginBottom="50dp"-->
+    <!--android:layout_centerHorizontal="true"-->
+    <!--app:cpb_colorIndicatorBackground="@android:color/transparent"-->
+    <!--app:cpb_colorProgress="@android:color/transparent"-->
+    <!---->
+    <!--/>-->
+
+    <fr.castorflex.android.circularprogressbar.CircularProgressBar xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="50dp"
+        android:background="@android:color/transparent"
+        android:indeterminate="true"
+        app:cpb_color="#3cb1d8"
+        app:cpb_max_sweep_angle="300"
+        app:cpb_min_sweep_angle="10"
+        app:cpb_rotation_speed="1.0"
+        app:cpb_stroke_width="4dp"
+        app:cpb_sweep_speed="1.0" />
+
+
+</RelativeLayout>
