@@ -123,7 +123,7 @@ public class LoginActivity extends Activity {
                             dialog.show();
                         } else {
                             dialog.dismiss();
-                            recreate();
+
                         }
 
                     }
@@ -149,13 +149,13 @@ public class LoginActivity extends Activity {
         protected String doInBackground(String... params) {
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost httppost = new HttpPost(
-                    "http://128.199.134.210/api/auth/index.php");
+                    "http://128.199.134.210/api/driver/authenticate/");
             String responseBody = null;
 
             try {
                 // Add your data
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-                nameValuePairs.add(new BasicNameValuePair("tag", "login"));
+                nameValuePairs.add(new BasicNameValuePair("type", "login"));
 
                 nameValuePairs.add(new BasicNameValuePair("email", params[0]));
                 nameValuePairs
@@ -173,9 +173,11 @@ public class LoginActivity extends Activity {
                 // Log.i("Parameters", params[0]);
 
             } catch (ClientProtocolException e) {
+                login_button.setProgress(0);
                 showDialog(context);
                 // TODO Auto-generated catch block
             } catch (IOException e) {
+                login_button.setProgress(0);
                 showDialog(context);
                 // TODO Auto-generated catch block
             }
@@ -198,18 +200,18 @@ public class LoginActivity extends Activity {
 
                 if (error.equals("0")) {
                     JSONObject user_details = data.getJSONObject("user");
-                    String fname = user_details.getString("fname");
-                    String lname = user_details.getString("lname");
+                    String name = user_details.getString("name");
+
                     String email = user_details.getString("email");
                     String phone = user_details.getString("phone");
-                    String uid = user_details.getString("uid");
+                    String did = user_details.getString("did");
 
                     editor.putString("is_login", "true");
-                    editor.putString("first_name", fname);
-                    editor.putString("last_name", lname);
+                    editor.putString("name", name);
+                    
                     editor.putString("email", email);
                     editor.putString("phone", phone);
-                    editor.putString("uid", uid);
+                    editor.putString("did", did);
 
                     editor.commit();
                     login_button.setProgress(100);
@@ -255,6 +257,7 @@ public class LoginActivity extends Activity {
 
                 }
             } catch (JSONException e) {
+                login_button.setProgress(0);
                 showDialog(context);
                 // TODO Auto-generated catch block
                 e.printStackTrace();

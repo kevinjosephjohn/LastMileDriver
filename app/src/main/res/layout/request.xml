@@ -31,6 +31,7 @@
             android:id="@+id/overlay"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
+            android:onClick="acceptRequest"
 
 
             />
@@ -38,7 +39,7 @@
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="210dp"
             android:layout_height="200dp"
-
+            android:id="@+id/progress"
             android:layout_centerInParent="true"
 
             android:background="@android:color/transparent"
@@ -49,6 +50,28 @@
             app:cpb_rotation_speed="1.0"
             app:cpb_stroke_width="5dp"
             app:cpb_sweep_speed="1.0" />
+
+
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="center_horizontal|bottom"
+
+        android:background="#3cb1d8">
+
+
+        <TextView
+
+            android:id="@+id/driver_status_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="10dp"
+            android:text="TOUCH TO ACCEPT REQUEST"
+            android:textColor="@color/white" />
+
 
 
     </RelativeLayout>

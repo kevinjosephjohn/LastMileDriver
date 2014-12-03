@@ -70,36 +70,37 @@ public class GcmIntentService extends IntentService {
 	// This is just one simple example of what you might choose to do with
 	// a GCM message.
 	private void sendNotification(String msg) {
-		// mNotificationManager = (NotificationManager)
-		// this.getSystemService(Context.NOTIFICATION_SERVICE);
-		//
-		// PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-		// new Intent(this, MainActivity.class), 0);
-		//
-		// NotificationCompat.Builder mBuilder =
-		// new NotificationCompat.Builder(this)
-		// .setSmallIcon(R.drawable.ic_launcher)
-		// .setContentTitle("GCM Notification")
-		// .setStyle(new NotificationCompat.BigTextStyle()
-		// .bigText(msg))
-		// .setContentText(msg);
-		//
-		// mBuilder.setContentIntent(contentIntent);
-		// mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
-//		try {
-//			JSONObject data = new JSONObject(msg);
-//			Intent intent = new Intent(this, MainActivity.class);
-//			intent.putExtra("lat", data.getString("lat"));
-//			intent.putExtra("lng", data.getString("lng"));
-//			intent.putExtra("name", data.getString("name"));
-//			intent.putExtra("phone", data.getString("phone"));
-//			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//		mNotificationManager = (NotificationManager)
+//		this.getSystemService(Context.NOTIFICATION_SERVICE);
 //
-//			startActivity(intent);
-//		} catch (JSONException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+//		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+//		new Intent(this, MainActivity.class), 0);
+//
+//		NotificationCompat.Builder mBuilder =
+//		new NotificationCompat.Builder(this)
+//		.setSmallIcon(R.drawable.ic_launcher)
+//		.setContentTitle("GCM Notification")
+//		.setStyle(new NotificationCompat.BigTextStyle()
+//		.bigText(msg))
+//		.setContentText(msg);
+//
+//		mBuilder.setContentIntent(contentIntent);
+//		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+		try {
+			JSONObject data = new JSONObject(msg);
+			Intent intent = new Intent(this, RequestActivity.class);
+			intent.putExtra("lat", data.getString("lat"));
+			intent.putExtra("lng", data.getString("lng"));
+			intent.putExtra("name", data.getString("name"));
+			intent.putExtra("phone", data.getString("phone"));
+            intent.putExtra("eta", data.getString("eta"));
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+			startActivity(intent);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 }
