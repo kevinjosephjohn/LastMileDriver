@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -18,15 +19,18 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -39,15 +43,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.dd.CircularProgressButton;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -61,6 +73,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
@@ -72,7 +86,35 @@ import fr.castorflex.android.circularprogressbar.CircularProgressBar;
 /**
  * Created by Nishanth on 02-12-2014.
  */
-public class RequestActivity extends ActionBarActivity {
+public class RequestActivity extends ActionBarActivity implements GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener, LocationListener {
+
+    // Milliseconds per second
+    private static final int MILLISECONDS_PER_SECOND = 1000;
+    // Update frequency in seconds
+    public static final int UPDATE_INTERVAL_IN_SECONDS = 5;
+    // Update frequency in milliseconds
+    private static final long UPDATE_INTERVAL =
+            MILLISECONDS_PER_SECOND * UPDATE_INTERVAL_IN_SECONDS;
+    // The fastest update frequency, in seconds
+    private static final int FASTEST_INTERVAL_IN_SECONDS = 1;
+    // A fast frequency ceiling in milliseconds
+    private static final long FASTEST_INTERVAL =
+            MILLISECONDS_PER_SECOND * FASTEST_INTERVAL_IN_SECONDS;
+    // Define an object that holds accuracy and frequency parameters
+    LocationRequest mLocationRequest;
+    boolean mUpdatesRequested;
+    // Global constants
+    /*
+     * Define a request code to send to Google Play services
+     * This code is returned in Activity.onActivityResult
+     */
+    private final static int
+            CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 1001;
+    Double current_lat, current_lng;
+    LocationClient mLocationClient;
+    Location mCurrentLocation;
     GoogleMap map;
     SharedPreferences pref;
     SharedPreferences.Editor editor;
@@ -81,12 +123,16 @@ public class RequestActivity extends ActionBarActivity {
     float numberXOffset;
     TextView client_name , client_number , client_address ;
     Dialog dialog;
+    Boolean status_internet;
+    InternetUtils check;
+    List<Marker> markers;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.request);
+        check = new InternetUtils();
         pref = getApplicationContext().getSharedPreferences("MyPref", 0);
         editor = pref.edit();
         Intent intent = getIntent();
@@ -95,7 +141,18 @@ public class RequestActivity extends ActionBarActivity {
         regular = Typeface.createFromAsset(this.getAssets(),
                 "fonts/regular.otf");
         light = Typeface.createFromAsset(this.getAssets(), "fonts/light.otf");
-
+        mLocationClient = new LocationClient(this, this, this);
+        // Start with updates turned off
+        mUpdatesRequested = false;
+        // Create the LocationRequest object
+        mLocationRequest = LocationRequest.create();
+        // Use high accuracy
+        mLocationRequest.setPriority(
+                LocationRequest.PRIORITY_HIGH_ACCURACY);
+        // Set the update interval to 5 seconds
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        // Set the fastest update interval to 1 second
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
 
 
         if (savedInstanceState == null) {
@@ -145,7 +202,7 @@ public class RequestActivity extends ActionBarActivity {
             String[] separated = duration.split(" ");
             LatLng myLocation = new LatLng(client_lat,
                     client_lng);
-//            map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_green)));
+
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,
                     17));
             client_name = (TextView) findViewById(R.id.clientname);
@@ -184,19 +241,18 @@ public class RequestActivity extends ActionBarActivity {
                     mPictoPaint);
             canvas.drawText(separated[0].toUpperCase(), numberXOffset,
                     numberYOffset, mPictoPaint);
-            List<Marker> markers = new ArrayList<Marker>();
-//            Marker car = map.addMarker(new MarkerOptions().position(
-//                    new LatLng(driver_lat, driver_lng)).icon(
-//                    BitmapDescriptorFactory.fromResource(R.drawable.car)));
+            markers = new ArrayList<Marker>();
+
             Marker user = map.addMarker(new MarkerOptions().position(
                     new LatLng(client_lat, client_lng)).icon(
                     BitmapDescriptorFactory.fromBitmap(mutableBitmap)));
-//            markers.add(car);
+
+
             markers.add(user);
             findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showDialog(context);
+                    cancelDialog(context);
                 }
             });
             findViewById(R.id.call).setOnClickListener(new View.OnClickListener() {
@@ -223,7 +279,38 @@ public class RequestActivity extends ActionBarActivity {
 
     }
 
+    /*
+ * Called when the Activity becomes visible.
+ */
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Connect the client.
+        mLocationClient.connect();
+    }
 
+    @Override
+    protected void onStop() {
+        // Disconnecting the client invalidates it.
+
+        // If the client is connected
+        if (mLocationClient.isConnected()) {
+            /*
+             * Remove location updates for a listener.
+             * The current Activity is the listener, so
+             * the argument is "this".
+             */
+            mLocationClient.removeLocationUpdates(this);
+        }
+        /*
+         * After disconnect() is called, the client is
+         * considered "dead".
+         */
+        mLocationClient.disconnect();
+        super.onStop();
+
+
+    }
     public static class PlaceholderFragment extends Fragment {
 
         public PlaceholderFragment() {
@@ -249,7 +336,21 @@ public class RequestActivity extends ActionBarActivity {
         floating_button.setVisibility(View.VISIBLE);
 
         Toast.makeText(this,"accepted",Toast.LENGTH_SHORT);
+        Marker car = map.addMarker(new MarkerOptions().position(
+                new LatLng(current_lat, current_lng)).icon(
+                BitmapDescriptorFactory.fromResource(R.drawable.car)));
+        markers.add(car);
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        for (Marker marker : markers) {
+            builder.include(marker.getPosition());
+        }
+        final LatLngBounds bounds = builder.build();
         new AcceptRequest().execute();
+        int padding = 200; // offset from edges of the map in pixels
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,
+                padding);
+        map.moveCamera(cu);
     }
 
     private class AcceptRequest extends AsyncTask<String, String, String> {
@@ -304,7 +405,7 @@ public class RequestActivity extends ActionBarActivity {
     public void onBackPressed() {
     }
 
-    public void showDialog(final Context context) {
+    public void cancelDialog(final Context context) {
 
         dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -401,5 +502,196 @@ public class RequestActivity extends ActionBarActivity {
 
     }
 
+    /*
+    * Called by Location Services when the request to connect the
+    * client finishes successfully. At this point, you can
+    * request the current location or start periodic updates
+    */
+    @Override
+    public void onConnected(Bundle dataBundle) {
+        // Display the connection status
+//        Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+        mCurrentLocation = mLocationClient.getLastLocation();
+        if (mCurrentLocation != null) {
+            LatLng myLocation = new LatLng(mCurrentLocation.getLatitude(),
+                    mCurrentLocation.getLongitude());
+            current_lat = mCurrentLocation.getLatitude();
+            current_lng = mCurrentLocation.getLongitude();
+       mLocationClient.requestLocationUpdates(mLocationRequest, RequestActivity.this);
+
+
+        }
+        else {
+
+            LocationDialog(context);
+        }
+
+    }
+
+    /*
+    * Called by Location Services if the connection to the
+    * location client drops because of an error.
+    */
+    @Override
+    public void onDisconnected() {
+        // Display the connection status
+//        Toast.makeText(this, "Disconnected. Please re-connect.",
+//                Toast.LENGTH_SHORT).show();
+    }
+
+    /*
+   * Called by Location Services if the attempt to
+   * Location Services fails.
+   */
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        /*
+         * Google Play services can resolve some errors it detects.
+         * If the error has a resolution, try sending an Intent to
+         * start a Google Play services activity that can resolve
+         * error.
+         */
+        if (connectionResult.hasResolution()) {
+            try {
+                // Start an Activity that tries to resolve the error
+                connectionResult.startResolutionForResult(
+                        this,
+                        CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                /*
+                * Thrown if Google Play services canceled the original
+                * PendingIntent
+                */
+            } catch (IntentSender.SendIntentException e) {
+                // Log the error
+                e.printStackTrace();
+            }
+        } else {
+            /*
+             * If no resolution is available, display a dialog to the
+             * user with the error.
+             */
+            showErrorDialog(connectionResult.getErrorCode());
+        }
+    }
+
+    void showErrorDialog(int code) {
+        GooglePlayServicesUtil.getErrorDialog(code, this,
+                REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
+    }
+
+    // Define the callback method that receives location updates
+    @Override
+    public void onLocationChanged(Location location) {
+        // Report to the UI that the location was updated
+
+        String msg = "Updated Location: " +
+                Double.toString(location.getLatitude()) + "," +
+                Double.toString(location.getLongitude());
+        Log.i(Double.toString(location.getLatitude()), Double.toString(location.getLongitude()));
+//        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+
+        current_lat = location.getLatitude();
+        current_lng = location.getLongitude();
+
+
+
+
+    }
+
+
+
+    public void showDialog(final Context context) {
+
+        dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.internetdialog);
+        dialog.setCancelable(false);
+        final CircularProgressButton dialogButton = (CircularProgressButton) dialog
+                .findViewById(R.id.tryagain);
+
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                dialogButton.setIndeterminateProgressMode(true);
+                dialogButton.setProgress(50);
+
+                new CountDownTimer(2000, 1000) {
+
+                    public void onTick(long millisUntilFinished) {
+                        dialogButton.setClickable(false);
+                    }
+
+                    public void onFinish() {
+
+                        if (!check.isConnected(context)) {
+
+                            dialogButton.setProgress(0);
+                            dialog.show();
+                        } else {
+                            dialog.dismiss();
+
+                        }
+
+                    }
+                }.start();
+
+            }
+
+        });
+        dialog.show();
+
+    }
+
+    public void LocationDialog(final Context context) {
+
+        TextView line1, line2;
+        final Dialog dialog = new Dialog(context);
+
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.internetdialog);
+
+        dialog.setCancelable(false);
+        final CircularProgressButton dialogButton = (CircularProgressButton) dialog
+                .findViewById(R.id.tryagain);
+        line1 = (TextView) dialog.findViewById(R.id.textView1);
+        line2 = (TextView) dialog.findViewById(R.id.textView2);
+
+        line1.setText("LOCATION SERVICES");
+        line2.setText("LOCATION SERVICES ALLOWS APP TO GATHER AND USE DATA INDICATING YOUR APPROXIMATE LOCATION.");
+        line2.setGravity(Gravity.CENTER);
+
+        dialogButton.setText("ENABLE");
+
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                // dialogButton.setIndeterminateProgressMode(true);
+                // dialogButton.setProgress(50);
+
+                // new CountDownTimer(1000, 1000) {
+                //
+                // public void onTick(long millisUntilFinished) {
+                //
+                // }
+                //
+                // public void onFinish() {
+
+                Intent gpsOptionsIntent = new Intent(
+                        android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(gpsOptionsIntent);
+                dialog.dismiss();
+
+                // }
+                // }.start();
+
+            }
+
+        });
+        dialog.show();
+    }
+
 
 }
+
