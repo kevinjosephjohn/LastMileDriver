@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <RelativeLayout
+        android:id="@+id/top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="CANCEL TRIP"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textView1"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:text="ARE YOU SURE YOU WANT TO CANCEL YOUR REQUEST? YOUR DRIVER HAS COMMITTED TO YOU AND IS EN ROUTE."
+            android:textSize="12sp" />
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/top"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/yes"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:background="@layout/button_states"
+            android:text="YES"
+
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/no"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@id/yes"
+            android:layout_weight="1"
+            android:background="@layout/button_states"
+            android:text="NO"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
+</RelativeLayout>

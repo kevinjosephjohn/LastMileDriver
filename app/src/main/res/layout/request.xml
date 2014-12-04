@@ -3,6 +3,7 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
 
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -18,13 +19,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/pin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+        <!--<ImageView-->
+            <!--android:id="@+id/pin"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_centerInParent="true"-->
 
-            android:src="@drawable/pin" />
+            <!--android:src="@drawable/pin" />-->
 
 
         <View
@@ -74,6 +75,119 @@
 
 
 
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="110dp"
+        android:layout_gravity="bottom"
+        android:visibility="gone"
+        android:id="@+id/user_details"
+        android:background="@android:color/transparent">
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="80dp"
+            android:layout_alignParentBottom="true"
+            android:background="@android:color/white">
+
+            <TextView
+                android:id="@+id/clientname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="104dp"
+                android:layout_marginTop="5dp"
+                android:text="SHIVA"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/clientaddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@id/clientname"
+                android:layout_below="@id/clientname"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="40dp"
+                android:text="TATA INDICA" />
+
+            <ImageView
+                android:id="@+id/caricon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/clientaddress"
+                android:layout_alignLeft="@id/clientname"
+                android:layout_alignTop="@id/clientaddress"
+                android:src="@drawable/mono_black" />
+
+            <TextView
+                android:id="@+id/clientnumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@id/clientname"
+                android:layout_below="@id/clientaddress"
+                android:layout_marginLeft="40dp"
+                android:text="TN 20 D 5384" />
+
+            <ImageView
+                android:id="@+id/licenseicon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/clientnumber"
+                android:layout_alignLeft="@id/clientname"
+                android:layout_alignTop="@id/clientnumber"
+                android:src="@drawable/license" />
+
+
+        </RelativeLayout>
+
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/profile_image"
+            app:border_color="#3cb1d8"
+            app:border_width="2dp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="gone"
+        android:id="@+id/floating_button"
+        >
+
+        <com.getbase.floatingactionbutton.FloatingActionsMenu
+            android:id="@+id/normal_plus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            fab:fab_addButtonColorNormal="#3cb1d8"
+            fab:fab_addButtonColorPressed="#ff00719b"
+            fab:fab_addButtonPlusIconColor="@color/white"
+            fab:fab_expandDirection="right">
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/call"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/call"
+                fab:fab_addButtonColorNormal="#3cb1d8"
+                fab:fab_addButtonColorPressed="#ff00719b" />
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_action_cancel"
+                fab:fab_addButtonColorNormal="#3cb1d8"
+                fab:fab_addButtonColorPressed="#ff00719b" />
+
+        </com.getbase.floatingactionbutton.FloatingActionsMenu>
     </RelativeLayout>
 
 
