@@ -94,6 +94,7 @@ public class GcmIntentService extends IntentService {
 			intent.putExtra("name", data.getString("name"));
 			intent.putExtra("phone", data.getString("phone"));
             intent.putExtra("eta", data.getString("eta"));
+            intent.putExtra("address", data.getString("address"));
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 			startActivity(intent);

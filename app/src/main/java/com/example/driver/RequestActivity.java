@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.ActionBarActivity;
@@ -82,6 +83,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.castorflex.android.circularprogressbar.CircularProgressBar;
+import fr.castorflex.android.circularprogressbar.CircularProgressDrawable;
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.view.CardViewNative;
 
 /**
  * Created by Nishanth on 02-12-2014.
@@ -121,11 +125,14 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
     Typeface regular, bold, light;
     Context context;
     float numberXOffset;
-    TextView client_name , client_number , client_address ;
+    TextView client_name, client_number, client_address;
     Dialog dialog;
     Boolean status_internet;
     InternetUtils check;
     List<Marker> markers;
+    Handler handler;
+    Runnable runnable;
+    CircularProgressBar progress;
 
 
     @Override
@@ -153,6 +160,26 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
         mLocationRequest.setInterval(UPDATE_INTERVAL);
         // Set the fastest update interval to 1 second
         mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        progress = (CircularProgressBar) findViewById(R.id.progress);
+
+        new CountDownTimer(30000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+
+
+            }
+
+            public void onFinish() {
+
+
+                startActivity(new Intent(RequestActivity.this,
+                        MainActivity.class));
+
+                finish();
+
+
+            }
+        }.start();
 
 
         if (savedInstanceState == null) {
@@ -191,9 +218,12 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
         map.getUiSettings().setZoomControlsEnabled(false);
 
         map.getUiSettings().setAllGesturesEnabled(false);
-        if(intent.getExtras()!= null) {
+
+
+        if (intent.getExtras() != null) {
 
             String clientname = intent.getStringExtra("name");
+            String address = intent.getStringExtra("address");
             final String phonenumber = intent.getStringExtra("phone");
 
             Double client_lat = Double.parseDouble(intent.getStringExtra("lat"));
@@ -207,10 +237,10 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
                     17));
             client_name = (TextView) findViewById(R.id.clientname);
             client_number = (TextView) findViewById(R.id.clientnumber);
-            client_address = (TextView) findViewById(R.id.clientaddress);
+            client_address = (TextView) findViewById(R.id.StreetName);
             client_name.setText(clientname);
             client_number.setText(phonenumber);
-            client_address.setText(clientname);
+            client_address.setText(address);
             Bitmap icon = BitmapFactory.decodeResource(getResources(),
                     R.drawable.pin_pickup_green);
             Bitmap mutableBitmap = icon.copy(Bitmap.Config.ARGB_8888, true);
@@ -264,6 +294,14 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
 
                 }
             });
+            //Create a Card
+            Card card = new Card(context);
+
+
+            //Set card in the cardView
+            CardViewNative cardView = (CardViewNative) findViewById(R.id.carddemo);
+            cardView.setCard(card);
+
 
         }
 
@@ -311,6 +349,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
 
 
     }
+
     public static class PlaceholderFragment extends Fragment {
 
         public PlaceholderFragment() {
@@ -325,17 +364,18 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
             return rootView;
         }
     }
-    public void acceptRequest(View v)
-    {
+
+    public void acceptRequest(View v) {
         v.setVisibility(View.GONE);
-        CircularProgressBar progress = (CircularProgressBar) findViewById(R.id.progress);
+
         progress.setVisibility(View.GONE);
         RelativeLayout user_details = (RelativeLayout) findViewById(R.id.user_details);
         RelativeLayout floating_button = (RelativeLayout) findViewById(R.id.floating_button);
+
         user_details.setVisibility(View.VISIBLE);
         floating_button.setVisibility(View.VISIBLE);
 
-        Toast.makeText(this,"accepted",Toast.LENGTH_SHORT);
+        Toast.makeText(this, "accepted", Toast.LENGTH_SHORT);
         Marker car = map.addMarker(new MarkerOptions().position(
                 new LatLng(current_lat, current_lng)).icon(
                 BitmapDescriptorFactory.fromResource(R.drawable.car)));
@@ -437,6 +477,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
         dialog.show();
 
     }
+
     private class CancelRide extends AsyncTask<String, Integer, String> {
 
         @Override
@@ -462,8 +503,6 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
                 nameValuePairs.add(new BasicNameValuePair("type", "cancel"));
 
 
-
-
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
                 // Execute HTTP Post Request
@@ -474,7 +513,6 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
                 // Log.i("Parameters", params[0]);
 
             } catch (ClientProtocolException e) {
-
 
 
                 // TODO Auto-generated catch block
@@ -517,11 +555,10 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
                     mCurrentLocation.getLongitude());
             current_lat = mCurrentLocation.getLatitude();
             current_lng = mCurrentLocation.getLongitude();
-       mLocationClient.requestLocationUpdates(mLocationRequest, RequestActivity.this);
+            mLocationClient.requestLocationUpdates(mLocationRequest, RequestActivity.this);
 
 
-        }
-        else {
+        } else {
 
             LocationDialog(context);
         }
@@ -594,10 +631,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
         current_lng = location.getLongitude();
 
 
-
-
     }
-
 
 
     public void showDialog(final Context context) {
