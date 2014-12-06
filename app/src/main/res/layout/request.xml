@@ -113,42 +113,9 @@
                 android:text="SHIVA"
                 android:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/clientaddress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignLeft="@id/clientname"
-                android:layout_below="@id/clientname"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="40dp"
-                android:text="TATA INDICA" />
 
-            <ImageView
-                android:id="@+id/caricon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/clientaddress"
-                android:layout_alignLeft="@id/clientname"
-                android:layout_alignTop="@id/clientaddress"
-                android:src="@drawable/mono_black" />
 
-            <TextView
-                android:id="@+id/clientnumber"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignLeft="@id/clientname"
-                android:layout_below="@id/clientaddress"
-                android:layout_marginLeft="40dp"
-                android:text="TN 20 D 5384" />
 
-            <ImageView
-                android:id="@+id/licenseicon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/clientnumber"
-                android:layout_alignLeft="@id/clientname"
-                android:layout_alignTop="@id/clientnumber"
-                android:src="@drawable/license" />
 
 
         </RelativeLayout>
@@ -176,20 +143,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-
+            fab:fab_icon="@drawable/call"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             fab:fab_addButtonColorNormal="#3cb1d8"
             fab:fab_addButtonColorPressed="#ff00719b"
-            fab:fab_addButtonPlusIconColor="@color/white"
-            fab:fab_expandDirection="right">
+
+            fab:fab_expandDirection="up">
 
             <com.getbase.floatingactionbutton.FloatingActionButton
                 android:id="@+id/call"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/call"
+
+                fab:fab_icon="@drawable/call"
                 fab:fab_addButtonColorNormal="#3cb1d8"
                 fab:fab_addButtonColorPressed="#ff00719b" />
 
@@ -197,8 +165,10 @@
                 android:id="@+id/cancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_action_cancel"
+
+                fab:fab_icon="@drawable/cancel_trip"
                 fab:fab_addButtonColorNormal="#3cb1d8"
+
                 fab:fab_addButtonColorPressed="#ff00719b" />
 
         </com.getbase.floatingactionbutton.FloatingActionsMenu>

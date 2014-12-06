@@ -125,7 +125,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
     Typeface regular, bold, light;
     Context context;
     float numberXOffset;
-    TextView client_name, client_number, client_address;
+    TextView client_name, client_address;
     Dialog dialog;
     Boolean status_internet;
     InternetUtils check;
@@ -133,6 +133,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
     Handler handler;
     Runnable runnable;
     CircularProgressBar progress;
+    CountDownTimer decline;
 
 
     @Override
@@ -162,7 +163,8 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
         mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
         progress = (CircularProgressBar) findViewById(R.id.progress);
 
-        new CountDownTimer(30000, 1000) {
+
+        decline = new CountDownTimer(30000, 1000) {
 
             public void onTick(long millisUntilFinished) {
 
@@ -222,7 +224,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
 
         if (intent.getExtras() != null) {
 
-            String clientname = intent.getStringExtra("name");
+            String clientname = intent.getStringExtra("name").toUpperCase();
             String address = intent.getStringExtra("address");
             final String phonenumber = intent.getStringExtra("phone");
 
@@ -236,11 +238,16 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,
                     17));
             client_name = (TextView) findViewById(R.id.clientname);
-            client_number = (TextView) findViewById(R.id.clientnumber);
             client_address = (TextView) findViewById(R.id.StreetName);
+//            client_number = (TextView) findViewById(R.id.clientnumber);
+
             client_name.setText(clientname);
-            client_number.setText(phonenumber);
             client_address.setText(address);
+
+            client_name.setTypeface(regular);
+            client_address.setTypeface(regular);
+//            client_number.setText(phonenumber);
+
             Bitmap icon = BitmapFactory.decodeResource(getResources(),
                     R.drawable.pin_pickup_green);
             Bitmap mutableBitmap = icon.copy(Bitmap.Config.ARGB_8888, true);
@@ -366,6 +373,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
     }
 
     public void acceptRequest(View v) {
+        decline.cancel();
         v.setVisibility(View.GONE);
 
         progress.setVisibility(View.GONE);

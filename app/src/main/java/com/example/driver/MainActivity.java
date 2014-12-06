@@ -163,6 +163,8 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
                     update_status = "online";
                     mLocationClient.requestLocationUpdates(mLocationRequest, MainActivity.this);
                     new UpdateStatus().execute();
+                    editor.putString("status", update_status);
+                    editor.commit();
 
 
                 } else {
@@ -174,11 +176,14 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
                     update_status = "offline";
                     mLocationClient.removeLocationUpdates(MainActivity.this);
                     new UpdateStatus().execute();
+                    editor.putString("status", update_status);
+                    editor.commit();
 
 
                 }
             }
         });
+
 
 
     }
@@ -214,6 +219,7 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
         super.onStop();
         update_status = "offline";
         new UpdateStatus().execute();
+
 
     }
 
@@ -278,8 +284,11 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
             map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_dot)));
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,
                     19));
-        }
-        else {
+            if ((pref.getString("status", null)).equalsIgnoreCase("online"))
+                driver_status.setChecked(true);
+            else
+                driver_status.setChecked(false);
+        } else {
 
             LocationDialog(context);
         }
