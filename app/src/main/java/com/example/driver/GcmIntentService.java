@@ -86,10 +86,17 @@ public class GcmIntentService extends IntentService {
 //
 //		mBuilder.setContentIntent(contentIntent);
 //		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        if(msg.equalsIgnoreCase("your trip has been cancelled"))
+        {
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
 		try {
 			JSONObject data = new JSONObject(msg);
 			Intent intent = new Intent(this, RequestActivity.class);
 			intent.putExtra("lat", data.getString("lat"));
+            intent.putExtra("id", data.getString("id"));
 			intent.putExtra("lng", data.getString("lng"));
 			intent.putExtra("name", data.getString("name"));
 			intent.putExtra("phone", data.getString("phone"));

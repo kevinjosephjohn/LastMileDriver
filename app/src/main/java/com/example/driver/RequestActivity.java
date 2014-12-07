@@ -135,6 +135,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
     CircularProgressBar progress;
     CountDownTimer decline;
     Marker user,car;
+    String cid;
 
 
     @Override
@@ -227,6 +228,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
 
             String clientname = intent.getStringExtra("name").toUpperCase();
             String address = intent.getStringExtra("address").toUpperCase();
+            cid = intent.getStringExtra("id").toUpperCase();
             final String phonenumber = intent.getStringExtra("phone");
 
             Double client_lat = Double.parseDouble(intent.getStringExtra("lat"));
@@ -354,6 +356,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
          */
         mLocationClient.disconnect();
         super.onStop();
+        map.clear();
 
 
     }
@@ -496,7 +499,8 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
             try {
                 // Add your data
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-                nameValuePairs.add(new BasicNameValuePair("type", "cancel"));
+                nameValuePairs.add(new BasicNameValuePair("type", "drivercancel"));
+                nameValuePairs.add(new BasicNameValuePair("uid", cid));
 
 
                 httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));

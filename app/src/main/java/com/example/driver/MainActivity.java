@@ -221,6 +221,7 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
         super.onStop();
         update_status = "offline";
         new UpdateStatus().execute();
+        map.clear();
 
 
     }
@@ -235,6 +236,7 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
     @Override
     protected void onResume() {
         super.onResume();
+
 
     }
 
