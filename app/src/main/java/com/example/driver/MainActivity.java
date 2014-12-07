@@ -15,6 +15,10 @@ import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory.Options;
 
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
@@ -32,6 +36,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -76,7 +82,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainActivity extends ActionBarActivity implements GooglePlayServicesClient.ConnectionCallbacks,
-        GooglePlayServicesClient.OnConnectionFailedListener, LocationListener {
+        GooglePlayServicesClient.OnConnectionFailedListener, LocationListener, SensorEventListener {
 
     // Milliseconds per second
     private static final int MILLISECONDS_PER_SECOND = 1000;
@@ -118,6 +124,9 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
     InternetUtils check;
     Dialog dialog;
     Marker car;
+    private SensorManager mSensorManager;
+    private float currentDegree = 0f;
+    String car_roation;
 
 
     @Override
@@ -133,6 +142,8 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
         }
 
         context = MainActivity.this;
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
         mLocationClient = new LocationClient(this, this, this);
         // Start with updates turned off
         mUpdatesRequested = false;
@@ -188,6 +199,23 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
         });
 
 
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+        // get the angle around the z-axis rotated
+        float degree = Math.round(event.values[0]);
+        car_roation = String.valueOf(degree);
+
+        // Start the animation
+        car.setRotation(degree);
+        currentDegree = -degree;
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
 
@@ -236,7 +264,20 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
 
     @Override
     protected void onResume() {
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
+
+                SensorManager.SENSOR_DELAY_GAME);
+
         super.onResume();
+
+
+    }
+    @Override
+    protected void onPause() {
+        mSensorManager.unregisterListener(this);
+
+
+        super.onPause();
 
 
     }
@@ -287,7 +328,7 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
 //        mLocationClient.requestLocationUpdates(mLocationRequest, this);
             current_lat = Double.toString(mCurrentLocation.getLatitude());
             current_lng = Double.toString(mCurrentLocation.getLongitude());
-            car = map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_dot)));
+            car = map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,
                     19));
             if ((pref.getString("status", null)).equalsIgnoreCase("online")) {
@@ -301,8 +342,7 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
 //                    }
 //                };
 //                runnable.run();
-            }
-            else {
+            } else {
                 driver_status.setChecked(false);
             }
 
@@ -449,7 +489,7 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
                 // Add your data
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
                 nameValuePairs.add(new BasicNameValuePair("type", "update"));
-                nameValuePairs.add(new BasicNameValuePair("location", current_lat + "," + current_lng));
+                nameValuePairs.add(new BasicNameValuePair("location", current_lat + "," + current_lng+","+car_roation));
 
                 nameValuePairs.add(new BasicNameValuePair("did", pref
                         .getString("did", "")));
@@ -488,7 +528,8 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
                 lng = Double.valueOf(data.getString("lng"));
                 LatLng myLocation = new LatLng(lat,
                         lng);
-                car = map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_dot)));
+                car = map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
+
 
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,
                         19));

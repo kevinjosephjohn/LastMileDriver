@@ -19,6 +19,10 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -91,7 +95,7 @@ import it.gmariotti.cardslib.library.view.CardViewNative;
  * Created by Nishanth on 02-12-2014.
  */
 public class RequestActivity extends ActionBarActivity implements GooglePlayServicesClient.ConnectionCallbacks,
-        GooglePlayServicesClient.OnConnectionFailedListener, LocationListener {
+        GooglePlayServicesClient.OnConnectionFailedListener, LocationListener,SensorEventListener {
 
     // Milliseconds per second
     private static final int MILLISECONDS_PER_SECOND = 1000;
@@ -136,6 +140,10 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
     CountDownTimer decline;
     Marker user,car;
     String cid;
+    String car_roation;
+
+    private SensorManager mSensorManager;
+    private float currentDegree = 0f;
 
 
     @Override
@@ -147,6 +155,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
         editor = pref.edit();
         Intent intent = getIntent();
         context = RequestActivity.this;
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         bold = Typeface.createFromAsset(this.getAssets(), "fonts/bold.otf");
         regular = Typeface.createFromAsset(this.getAssets(),
                 "fonts/regular.otf");
@@ -360,6 +369,23 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
 
 
     }
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+        // get the angle around the z-axis rotated
+        float degree = Math.round(event.values[0]);
+        car_roation = String.valueOf(degree);
+
+        // Start the animation
+        car.setRotation(degree);
+        currentDegree = -degree;
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
 
     public static class PlaceholderFragment extends Fragment {
 
@@ -387,6 +413,25 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
         user_details.setVisibility(View.VISIBLE);
         floating_button.setVisibility(View.VISIBLE);
         new AcceptRequest().execute();
+
+
+    }
+    @Override
+    protected void onResume() {
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
+
+                SensorManager.SENSOR_DELAY_GAME);
+
+        super.onResume();
+
+
+    }
+    @Override
+    protected void onPause() {
+        mSensorManager.unregisterListener(this);
+
+
+        super.onPause();
 
 
     }
@@ -657,7 +702,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
                 // Add your data
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
                 nameValuePairs.add(new BasicNameValuePair("type", "update"));
-                nameValuePairs.add(new BasicNameValuePair("location", current_lat + "," + current_lng));
+                nameValuePairs.add(new BasicNameValuePair("location", current_lat + "," + current_lng+","+car_roation));
 
                 nameValuePairs.add(new BasicNameValuePair("did", pref
                         .getString("did", "")));
