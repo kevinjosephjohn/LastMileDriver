@@ -220,8 +220,8 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
          */
         mLocationClient.disconnect();
         super.onStop();
-        update_status = "offline";
-        new UpdateStatus().execute();
+//        update_status = "offline";
+//        new UpdateStatus().execute();
         map.clear();
 
 
