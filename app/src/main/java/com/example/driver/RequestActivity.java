@@ -134,6 +134,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
     Runnable runnable;
     CircularProgressBar progress;
     CountDownTimer decline;
+    Marker user,car;
 
 
     @Override
@@ -225,7 +226,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
         if (intent.getExtras() != null) {
 
             String clientname = intent.getStringExtra("name").toUpperCase();
-            String address = intent.getStringExtra("address");
+            String address = intent.getStringExtra("address").toUpperCase();
             final String phonenumber = intent.getStringExtra("phone");
 
             Double client_lat = Double.parseDouble(intent.getStringExtra("lat"));
@@ -280,7 +281,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
                     numberYOffset, mPictoPaint);
             markers = new ArrayList<Marker>();
 
-            Marker user = map.addMarker(new MarkerOptions().position(
+            user = map.addMarker(new MarkerOptions().position(
                     new LatLng(client_lat, client_lng)).icon(
                     BitmapDescriptorFactory.fromBitmap(mutableBitmap)));
 
@@ -382,23 +383,9 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
 
         user_details.setVisibility(View.VISIBLE);
         floating_button.setVisibility(View.VISIBLE);
-
-        Toast.makeText(this, "accepted", Toast.LENGTH_SHORT);
-        Marker car = map.addMarker(new MarkerOptions().position(
-                new LatLng(current_lat, current_lng)).icon(
-                BitmapDescriptorFactory.fromResource(R.drawable.car)));
-        markers.add(car);
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-
-        for (Marker marker : markers) {
-            builder.include(marker.getPosition());
-        }
-        final LatLngBounds bounds = builder.build();
         new AcceptRequest().execute();
-        int padding = 200; // offset from edges of the map in pixels
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,
-                padding);
-        map.moveCamera(cu);
+
+
     }
 
     private class AcceptRequest extends AsyncTask<String, String, String> {
@@ -564,6 +551,10 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
             current_lat = mCurrentLocation.getLatitude();
             current_lng = mCurrentLocation.getLongitude();
             mLocationClient.requestLocationUpdates(mLocationRequest, RequestActivity.this);
+            car = map.addMarker(new MarkerOptions().position(
+                    myLocation).icon(
+                    BitmapDescriptorFactory.fromResource(R.drawable.car)));
+
 
 
         } else {
@@ -637,6 +628,95 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
 
         current_lat = location.getLatitude();
         current_lng = location.getLongitude();
+        status_internet = check.isConnected(context);
+        if (!status_internet) {
+
+
+        } else {
+            new PollingLocation().execute();
+        }
+
+
+    }
+
+    private class PollingLocation extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpPost httppost = new HttpPost(
+                    "http://128.199.134.210/api/driver/status/");
+            String responseBody = null;
+
+            try {
+                // Add your data
+                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+                nameValuePairs.add(new BasicNameValuePair("type", "update"));
+                nameValuePairs.add(new BasicNameValuePair("location", current_lat + "," + current_lng));
+
+                nameValuePairs.add(new BasicNameValuePair("did", pref
+                        .getString("did", "")));
+
+
+//                nameValuePairs.add(new BasicNameValuePair("gcm_regid", pref
+//                        .getString("registration_id", "")));
+
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+                // Execute HTTP Post Request
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity entity = response.getEntity();
+                responseBody = EntityUtils.toString(entity);
+                Log.i("Response", responseBody);
+                // Log.i("Parameters", params[0]);
+
+            } catch (ClientProtocolException e) {
+
+            } catch (IOException e) {
+
+            }
+            return responseBody;
+
+        }
+
+
+        @Override
+        protected void onPostExecute(String result) {
+
+            Double lat, lng;
+            try {
+                JSONObject data = new JSONObject(result);
+                lat = Double.valueOf(data.getString("lat"));
+                lng = Double.valueOf(data.getString("lng"));
+                LatLng myLocation = new LatLng(lat,
+                        lng);
+
+//                markers.add(car);
+                car.remove();
+                car = map.addMarker(new MarkerOptions().position(
+                        myLocation).icon(
+                        BitmapDescriptorFactory.fromResource(R.drawable.car)));
+                map.getUiSettings().setAllGesturesEnabled(true);
+//                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+//
+//                for (Marker marker : markers) {
+//                    builder.include(marker.getPosition());
+//                }
+//                final LatLngBounds bounds = builder.build();
+//
+//                int padding = 200; // offset from edges of the map in pixels
+//                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,
+//                        padding);
+//                map.moveCamera(cu);
+
+
+            } catch (JSONException e) {
+
+
+            }
+
+
+        }
 
 
     }
