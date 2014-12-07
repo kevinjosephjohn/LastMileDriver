@@ -416,16 +416,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
 
 
     }
-    @Override
-    protected void onResume() {
-        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
 
-                SensorManager.SENSOR_DELAY_GAME);
-
-        super.onResume();
-
-
-    }
     @Override
     protected void onPause() {
         mSensorManager.unregisterListener(this);
@@ -601,6 +592,9 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
             current_lat = mCurrentLocation.getLatitude();
             current_lng = mCurrentLocation.getLongitude();
             mLocationClient.requestLocationUpdates(mLocationRequest, RequestActivity.this);
+            mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
+
+                    SensorManager.SENSOR_DELAY_GAME);
             car = map.addMarker(new MarkerOptions().position(
                     myLocation).icon(
                     BitmapDescriptorFactory.fromResource(R.drawable.car)));
