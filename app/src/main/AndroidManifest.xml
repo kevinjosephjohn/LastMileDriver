@@ -37,6 +37,7 @@
             android:name="com.example.driver.SplashPageActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
+            android:theme="@style/SplashPage"
 
 
 
