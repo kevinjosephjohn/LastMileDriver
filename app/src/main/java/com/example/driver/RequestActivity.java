@@ -1,6 +1,8 @@
 package com.example.driver;
 
 
+import android.animation.ObjectAnimator;
+import android.animation.TypeEvaluator;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.content.Context;
@@ -33,6 +35,7 @@ import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.util.Property;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -736,10 +739,12 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
                         lng);
 
 //                markers.add(car);
-                car.remove();
-                car = map.addMarker(new MarkerOptions().position(
-                        myLocation).icon(
-                        BitmapDescriptorFactory.fromResource(R.drawable.car)));
+//                car.remove();
+//                car = map.addMarker(new MarkerOptions().position(
+//                        myLocation).icon(
+//                        BitmapDescriptorFactory.fromResource(R.drawable.car)));
+                LatLngInterpolator test = new LatLngInterpolator.LinearFixed();
+                animateMarkerToICS(car,myLocation,test);
                 map.getUiSettings().setAllGesturesEnabled(true);
 //                LatLngBounds.Builder builder = new LatLngBounds.Builder();
 //
@@ -856,6 +861,19 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
 
         });
         dialog.show();
+    }
+
+    static void animateMarkerToICS(Marker marker, LatLng finalPosition, final LatLngInterpolator latLngInterpolator) {
+        TypeEvaluator<LatLng> typeEvaluator = new TypeEvaluator<LatLng>() {
+            @Override
+            public LatLng evaluate(float fraction, LatLng startValue, LatLng endValue) {
+                return latLngInterpolator.interpolate(fraction, startValue, endValue);
+            }
+        };
+        Property<Marker, LatLng> property = Property.of(Marker.class, LatLng.class, "position");
+        ObjectAnimator animator = ObjectAnimator.ofObject(marker, property, typeEvaluator, finalPosition);
+        animator.setDuration(3000);
+        animator.start();
     }
 
 

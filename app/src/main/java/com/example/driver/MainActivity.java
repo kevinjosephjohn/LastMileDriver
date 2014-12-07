@@ -1,5 +1,7 @@
 package com.example.driver;
 
+import android.animation.ObjectAnimator;
+import android.animation.TypeEvaluator;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -29,6 +31,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
+import android.util.Property;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -329,6 +332,8 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
             current_lat = Double.toString(mCurrentLocation.getLatitude());
             current_lng = Double.toString(mCurrentLocation.getLongitude());
             car = map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
+
+
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,
                     19));
             if ((pref.getString("status", null)).equalsIgnoreCase("online")) {
@@ -522,13 +527,15 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
 
             Double lat, lng;
             try {
-                car.remove();
+
                 JSONObject data = new JSONObject(result);
                 lat = Double.valueOf(data.getString("lat"));
                 lng = Double.valueOf(data.getString("lng"));
                 LatLng myLocation = new LatLng(lat,
                         lng);
-                car = map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.car)));
+
+                LatLngInterpolator test = new LatLngInterpolator.LinearFixed();
+                animateMarkerToICS(car,myLocation,test);
 
 
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,
@@ -634,6 +641,19 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
 
         });
         dialog.show();
+    }
+
+    static void animateMarkerToICS(Marker marker, LatLng finalPosition, final LatLngInterpolator latLngInterpolator) {
+        TypeEvaluator<LatLng> typeEvaluator = new TypeEvaluator<LatLng>() {
+            @Override
+            public LatLng evaluate(float fraction, LatLng startValue, LatLng endValue) {
+                return latLngInterpolator.interpolate(fraction, startValue, endValue);
+            }
+        };
+        Property<Marker, LatLng> property = Property.of(Marker.class, LatLng.class, "position");
+        ObjectAnimator animator = ObjectAnimator.ofObject(marker, property, typeEvaluator, finalPosition);
+        animator.setDuration(3000);
+        animator.start();
     }
 
 }
