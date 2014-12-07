@@ -54,6 +54,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.apache.http.HttpEntity;
@@ -116,6 +117,7 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
     boolean status_internet;
     InternetUtils check;
     Dialog dialog;
+    Marker car;
 
 
     @Override
@@ -280,8 +282,8 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
             LatLng myLocation = new LatLng(mCurrentLocation.getLatitude(),
                     mCurrentLocation.getLongitude());
 //        mLocationClient.requestLocationUpdates(mLocationRequest, this);
-            map.clear();
-            map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_dot)));
+
+            car = map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_dot)));
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,
                     19));
             if ((pref.getString("status", null)).equalsIgnoreCase("online"))
@@ -350,7 +352,7 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
     @Override
     public void onLocationChanged(Location location) {
         // Report to the UI that the location was updated
-        map.clear();
+
         String msg = "Updated Location: " +
                 Double.toString(location.getLatitude()) + "," +
                 Double.toString(location.getLongitude());
@@ -464,13 +466,14 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
 
             Double lat, lng;
             try {
+                car.remove();
                 JSONObject data = new JSONObject(result);
                 lat = Double.valueOf(data.getString("lat"));
                 lng = Double.valueOf(data.getString("lng"));
                 LatLng myLocation = new LatLng(lat,
                         lng);
-                map.clear();
-                map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_dot)));
+                car = map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_dot)));
+
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,
                         19));
             } catch (JSONException e) {

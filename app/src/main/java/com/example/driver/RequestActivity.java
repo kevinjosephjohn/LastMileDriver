@@ -438,6 +438,7 @@ public class RequestActivity extends ActionBarActivity implements GooglePlayServ
 
     @Override
     public void onBackPressed() {
+        cancelDialog(context);
     }
 
     public void cancelDialog(final Context context) {
