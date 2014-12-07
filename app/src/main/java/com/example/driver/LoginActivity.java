@@ -212,6 +212,7 @@ public class LoginActivity extends Activity {
                     editor.putString("email", email);
                     editor.putString("phone", phone);
                     editor.putString("did", did);
+                    editor.putString("status", "offline");
 
                     editor.commit();
                     login_button.setProgress(100);

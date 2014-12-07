@@ -81,12 +81,12 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
     // Milliseconds per second
     private static final int MILLISECONDS_PER_SECOND = 1000;
     // Update frequency in seconds
-    public static final int UPDATE_INTERVAL_IN_SECONDS = 5;
+    public static final int UPDATE_INTERVAL_IN_SECONDS = 10;
     // Update frequency in milliseconds
     private static final long UPDATE_INTERVAL =
             MILLISECONDS_PER_SECOND * UPDATE_INTERVAL_IN_SECONDS;
     // The fastest update frequency, in seconds
-    private static final int FASTEST_INTERVAL_IN_SECONDS = 1;
+    private static final int FASTEST_INTERVAL_IN_SECONDS = 5;
     // A fast frequency ceiling in milliseconds
     private static final long FASTEST_INTERVAL =
             MILLISECONDS_PER_SECOND * FASTEST_INTERVAL_IN_SECONDS;
@@ -153,7 +153,7 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
         driver_status = (SwitchCompat) findViewById(R.id.driver_status);
         driver_status_text = (TextView) findViewById(R.id.driver_status_text);
         handler = new Handler();
-        onStop();
+
 
         driver_status.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -180,6 +180,7 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
                     new UpdateStatus().execute();
                     editor.putString("status", update_status);
                     editor.commit();
+//                    handler.removeCallbacks(runnable);
 
 
                 }
@@ -284,14 +285,27 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
             LatLng myLocation = new LatLng(mCurrentLocation.getLatitude(),
                     mCurrentLocation.getLongitude());
 //        mLocationClient.requestLocationUpdates(mLocationRequest, this);
-
+            current_lat = Double.toString(mCurrentLocation.getLatitude());
+            current_lng = Double.toString(mCurrentLocation.getLongitude());
             car = map.addMarker(new MarkerOptions().position(myLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_dot)));
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,
                     19));
-            if ((pref.getString("status", null)).equalsIgnoreCase("online"))
+            if ((pref.getString("status", null)).equalsIgnoreCase("online")) {
                 driver_status.setChecked(true);
-            else
+//                handler = new Handler();
+//                runnable = new Runnable() {
+//                    public void run() {
+//                        new PollingLocation().execute();
+//
+//                        handler.postDelayed(this, 5000);
+//                    }
+//                };
+//                runnable.run();
+            }
+            else {
                 driver_status.setChecked(false);
+            }
+
         } else {
 
             LocationDialog(context);
@@ -480,7 +494,7 @@ public class MainActivity extends ActionBarActivity implements GooglePlayService
                         19));
             } catch (JSONException e) {
 
-                new PollingLocation().execute();
+
             }
 
 
